@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using MottuNET.data;
+
 namespace MottuNET
 {
     public class Program
@@ -7,7 +10,10 @@ namespace MottuNET
         {
             var builder = WebApplication.CreateBuilder(args);
 
-          
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseOracle(builder.Configuration.GetConnectionString("OracleDb")));
+
+
             builder.Services.AddControllers();
 
             
