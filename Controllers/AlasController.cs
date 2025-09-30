@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MottuNET.data;
-using MottuNET.Models;
+using MottuNET.DTOs.Ala;
+using MottuNET.Services.Interfaces;
 
 namespace MottuNET.Controllers
 {
@@ -9,87 +8,55 @@ namespace MottuNET.Controllers
     [ApiController]
     public class AlasController : ControllerBase
     {
+        private readonly IAlaService _alaService;
 
-        private readonly AppDbContext _context;
-
-        public AlasController(AppDbContext context)
+        public AlasController(IAlaService alaService)
         {
-            _context = context;
+            _alaService = alaService;
         }
 
         
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ala>>> GetAlas()
+        public async Task<ActionResult<IEnumerable<AlaResponseDTO>>> GetAll()
         {
-            return await _context.Alas.Include(a => a.Motos).ToListAsync();
+            var alas = await _alaService.GetAllAsync();
+            if (!alas.Any()) return NoContent();
+            return Ok(alas);
         }
 
         
         [HttpGet("{id}")]
-        public async Task<ActionResult<Ala>> GetAla(int id)
+        public async Task<ActionResult<AlaResponseDTO>> GetById(int id)
         {
-            var ala = await _context.Alas.Include(a => a.Motos)
-                                         .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (ala == null)
-                return NotFound();
-
-            return ala;
+            var ala = await _alaService.GetByIdAsync(id);
+            if (ala == null) return NotFound();
+            return Ok(ala);
         }
 
-       
+        
         [HttpPost]
-        public async Task<ActionResult<Ala>> PostAla(Ala ala)
+        public async Task<ActionResult<AlaResponseDTO>> Create(AlaRequestDTO dto)
         {
-            if (string.IsNullOrEmpty(ala.Nome))
-                return BadRequest("Nome é obrigatório");
-
-            _context.Alas.Add(ala);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAla), new { id = ala.Id }, ala);
+            var ala = await _alaService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = ala.Id }, ala);
         }
 
         
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAla(int id, Ala ala)
+        public async Task<IActionResult> Update(int id, AlaRequestDTO dto)
         {
-            if (id != ala.Id)
-                return BadRequest();
-
-            _context.Entry(ala).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AlaExists(id))
-                    return NotFound();
-                else
-                    throw;
-            }
-
+            var ala = await _alaService.UpdateAsync(id, dto);
+            if (ala == null) return NotFound();
             return NoContent();
         }
 
         
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAla(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var ala = await _context.Alas.FindAsync(id);
-            if (ala == null)
-                return NotFound();
-
-            _context.Alas.Remove(ala);
-            await _context.SaveChangesAsync();
-
+            var deleted = await _alaService.DeleteAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
-
-        private bool AlaExists(int id) =>
-            _context.Alas.AnyAsync(a => a.Id == id).Result;
     }
 }
-

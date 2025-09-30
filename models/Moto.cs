@@ -1,8 +1,7 @@
-﻿using MottuNET.Models;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace MottuNET.model
+namespace MottuNET.Models
 {
     public enum StatusMoto
     {

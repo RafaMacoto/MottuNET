@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using MottuNET.model;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MottuNET.Models
 {

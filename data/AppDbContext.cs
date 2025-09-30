@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MottuNET.model;
 using MottuNET.Models;
 
 namespace MottuNET.data
