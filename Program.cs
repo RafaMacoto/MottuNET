@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using MottuNET.data;
+using Microsoft.Extensions.DependencyInjection;
+using MottuNET.Services.Interfaces;
+using MottuNET.Services;
 
 namespace MottuNET
 {
@@ -19,6 +22,8 @@ namespace MottuNET
             
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IAlaService, AlaService>();
+            builder.Services.AddScoped<IMotoService, MotoService>();
 
             var app = builder.Build();
 
