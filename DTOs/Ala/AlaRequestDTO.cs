@@ -1,6 +1,4 @@
 ﻿namespace MottuNET.DTOs.Ala
 {
-    public record AlaRequestDTO(String Nome)
-    {
-    }
+    public record AlaRequestDTO(String Nome);
 }
