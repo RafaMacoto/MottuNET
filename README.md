@@ -1,60 +1,140 @@
 # MottuNET API
 
-API RESTful desenvolvida em ASP.NET Core (.NET 9) para gerenciamento de Motos e Alas, com integração ao banco Oracle via Entity Framework Core.
+[![.NET](https://img.shields.io/badge/.NET-9-informational?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Oracle](https://img.shields.io/badge/Oracle-DB-orange?logo=oracle&logoColor=white)](https://www.oracle.com/)
+[![Swagger](https://img.shields.io/badge/Swagger-API-blue?logo=swagger&logoColor=white)](http://localhost:5237/swagger)
 
-## Descrição
+API RESTful desenvolvida em **ASP.NET Core (.NET 9)** para gerenciamento de **Motos, Alas e Usuários**, com integração ao banco Oracle via **Entity Framework Core**.
 
-Esta API permite criar, consultar, atualizar e deletar motos e alas.  
-A entidade `Moto` possui atributos como modelo, status, posição, problema, placa e referência para uma `Ala`.  
-A entidade `Ala` contém um nome e uma lista de motos associadas.
+---
+
+## Integrantes
+
+- Rafael Macoto - 554992  
+- Fernando Henrique Aguiar - 557525  
+- Gabrielly Macedo - 558962  
+
+---
+
+## Entidades principais e justificativa do domínio
+
+O sistema possui três entidades principais:  
+
+1. **Usuário** – controla quem realiza ações no sistema.  
+2. **Ala** – organiza motos em setores, facilitando gerenciamento e localização.  
+3. **Moto** – representa o objeto central, com atributos como modelo, status, posição, problema e placa.  
+
+**Justificativa:** essas entidades refletem o domínio de **gerenciamento operacional de motos em alas**, permitindo organização clara, regras de negócio bem definidas e escalabilidade futura (ex.: histórico de manutenção, relatórios, notificações).
+
+---
+
+## Justificativa da Arquitetura
+
+A aplicação foi desenvolvida seguindo **arquitetura em camadas**, separando responsabilidades:  
+
+- **Controllers**: recebem requisições HTTP e retornam respostas.  
+- **Services**: contêm lógica de negócio e validações.  
+- **DTOs**: transferência de dados entre Controller e Service.  
+- **Data (AppDbContext)**: persistência via Entity Framework Core com Oracle.  
+
+Essa arquitetura facilita **manutenção, testes unitários e escalabilidade**, além de permitir integração fácil com Swagger/OpenAPI para documentação.
+
+---
 
 ## Tecnologias usadas
 
-- .NET 9 (ASP.NET Core Web API com Controllers)  
-- Entity Framework Core com Oracle (Oracle.ManagedDataAccess.Core)  
-- Swagger para documentação da API  
-- Banco de dados Oracle (oracle.fiap.com.br, ORCL, porta 1521)
+- .NET 9 (ASP.NET Core Web API)  
+- Entity Framework Core com Oracle (`Oracle.ManagedDataAccess.Core`)  
+- Swagger / Swashbuckle para documentação da API  
+- Swagger Examples (`Swashbuckle.AspNetCore.Filters`)  
+- Banco de dados Oracle  
+- Git para versionamento de código  
+
+---
 
 ## Endpoints disponíveis
+
+### Usuário
+
+| Método | Endpoint            | Descrição                       | Parâmetros          |
+|--------|-------------------|--------------------------------|-------------------|
+| GET    | /api/usuario       | Lista todos os usuários         | -                 |
+| GET    | /api/usuario/{id}  | Busca um usuário pelo ID        | PathParam `id`    |
+| POST   | /api/usuario       | Cria um novo usuário            | JSON no Body      |
+| PUT    | /api/usuario/{id}  | Atualiza um usuário existente   | PathParam `id`, JSON no Body |
+| DELETE | /api/usuario/{id}  | Deleta um usuário pelo ID       | PathParam `id`    |
 
 ### Ala
 
 | Método | Endpoint         | Descrição                       | Parâmetros        |
-|--------|------------------|--------------------------------|-------------------|
-| GET    | /api/alas        | Lista todas as alas             | QueryParams       |
-| GET    | /api/alas/{id}   | Busca uma ala pelo ID           | PathParam `id`    |
-| POST   | /api/alas        | Cria uma nova ala               | JSON no Body      |
-| PUT    | /api/alas/{id}   | Atualiza uma ala existente      | PathParam `id`, JSON no Body |
-| DELETE | /api/alas/{id}   | Deleta uma ala pelo ID          | PathParam `id`    |
+|--------|-----------------|---------------------------------|------------------|
+| GET    | /api/alas       | Lista todas as alas             | -                |
+| GET    | /api/alas/{id}  | Busca uma ala pelo ID           | PathParam `id`   |
+| POST   | /api/alas       | Cria uma nova ala               | JSON no Body     |
+| PUT    | /api/alas/{id}  | Atualiza uma ala existente      | PathParam `id`, JSON no Body |
+| DELETE | /api/alas/{id}  | Deleta uma ala pelo ID          | PathParam `id`   |
 
 ### Moto
 
 | Método | Endpoint          | Descrição                      | Parâmetros          |
-|--------|-------------------|-------------------------------|---------------------|
-| GET    | /api/motos        | Lista todas as motos           | QueryParams         |
-| GET    | /api/motos/{id}   | Busca uma moto pelo ID         | PathParam `id`      |
-| POST   | /api/motos        | Cria uma nova moto             | JSON no Body        |
-| PUT    | /api/motos/{id}   | Atualiza uma moto existente    | PathParam `id`, JSON no Body |
-| DELETE | /api/motos/{id}   | Deleta uma moto pelo ID        | PathParam `id`      |
+|--------|------------------|--------------------------------|---------------------|
+| GET    | /api/motos       | Lista todas as motos           | QueryParams (`modelo`, `status`, `alaId`) |
+| GET    | /api/motos/{id}  | Busca uma moto pelo ID         | PathParam `id`      |
+| POST   | /api/motos       | Cria uma nova moto             | JSON no Body        |
+| PUT    | /api/motos/{id}  | Atualiza uma moto existente    | PathParam `id`, JSON no Body |
+| DELETE | /api/motos/{id}  | Deleta uma moto pelo ID        | PathParam `id`      |
 
-## Como rodar o projeto
+---
 
-### Pré-requisitos
+## Exemplos de uso dos endpoints
 
-- .NET 9 SDK instalado  
-- Banco de dados Oracle acessível (configurar string de conexão no `appsettings.json`)  
-- Visual Studio 2022 ou outro editor de sua preferência
+### Criar Usuário
 
-### Passos
+```json
+POST /api/usuario
+{
+  "nome": "Rafael Macoto",
+  "email": "rafael@example.com",
+  "senha": "senha123"
+}
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/RafaMacoto/MottuNET.git
+# Criar Moto
+POST /api/motos
+{
+  "modelo": "Honda CG",
+  "status": "Disponivel",
+  "posicao": "Estacionamento A",
+  "problema": null,
+  "placa": "ABC1234",
+  "alaId": 1
+}
 
-   cd MottuNet
+# Criar Ala
+POST /api/alas
+{
+  "nome": "Ala Norte"
+}
 
-   dotnet ef database update
+# Para mais exemplos, utilize o Swagger UI disponível em /swagger.
 
-   dotnet run
+# Como rodar a API
 
-   https://localhost:5001/swagger
+## Pré-requisitos
+- .NET 9 SDK instalado
+- Banco de dados Oracle acessível (configurar string de conexão no appsettings.json)
+- Visual Studio 2022, VS Code ou outro editor de preferência
+
+## Passos
+
+# Clone o repositório
+git clone https://github.com/RafaMacoto/MottuNET.git
+cd MottuNET
+
+# Atualize o banco de dados via Entity Framework
+dotnet ef database update
+
+# Execute a aplicação
+dotnet run
+
+# Acesse o Swagger UI
+http://localhost:5237/swagger
