@@ -10,7 +10,9 @@ API RESTful desenvolvida em **ASP.NET Core (.NET 9)** para gerenciamento de **Mo
 
 ## Integrantes
 
-- Rafael Macoto
+- Rafael Macoto - 554992  
+- Fernando Henrique Aguiar - 557525  
+- Gabrielly Macedo - 558962  
 
 ---
 
@@ -95,9 +97,8 @@ POST /api/usuario
   "email": "rafael@example.com",
   "senha": "senha123"
 }
-Criar Moto
-json
-Copiar código
+
+# Criar Moto
 POST /api/motos
 {
   "modelo": "Honda CG",
@@ -107,42 +108,33 @@ POST /api/motos
   "placa": "ABC1234",
   "alaId": 1
 }
-Criar Ala
-json
-Copiar código
+
+# Criar Ala
 POST /api/alas
 {
   "nome": "Ala Norte"
 }
-Para mais exemplos, utilize o Swagger UI disponível em /swagger.
 
-Como rodar a API
-Pré-requisitos
-.NET 9 SDK instalado
+# Para mais exemplos, utilize o Swagger UI disponível em /swagger.
 
-Banco de dados Oracle acessível (configurar string de conexão no appsettings.json)
+# Como rodar a API
 
-Visual Studio 2022, VS Code ou outro editor de preferência
+## Pré-requisitos
+- .NET 9 SDK instalado
+- Banco de dados Oracle acessível (configurar string de conexão no appsettings.json)
+- Visual Studio 2022, VS Code ou outro editor de preferência
 
-Passos
-Clone o repositório:
+## Passos
 
-bash
-Copiar código
+# Clone o repositório
 git clone https://github.com/RafaMacoto/MottuNET.git
 cd MottuNET
-Atualize o banco de dados via Entity Framework:
 
-bash
-Copiar código
+# Atualize o banco de dados via Entity Framework
 dotnet ef database update
-Execute a aplicação:
 
-bash
-Copiar código
+# Execute a aplicação
 dotnet run
-Acesse o Swagger UI:
 
-bash
-Copiar código
+# Acesse o Swagger UI
 http://localhost:5237/swagger
