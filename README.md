@@ -1,14 +1,28 @@
 # MottuNET API
 
+[![.NET](https://img.shields.io/badge/.NET-9-informational?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Oracle](https://img.shields.io/badge/Oracle-DB-orange?logo=oracle&logoColor=white)](https://www.oracle.com/)
+[![Swagger](https://img.shields.io/badge/Swagger-API-blue?logo=swagger&logoColor=white)](http://localhost:5237/swagger)
+
 API RESTful desenvolvida em **ASP.NET Core (.NET 9)** para gerenciamento de **Motos, Alas e Usuários**, com integração ao banco Oracle via **Entity Framework Core**.
 
 ---
 
 ## Integrantes
 
-- Rafael Macoto - 554992
-- Fernando Henrique Aguiar - 557525
-- Gabrielly Macedo - 558962
+- Rafael Macoto
+
+---
+
+## Entidades principais e justificativa do domínio
+
+O sistema possui três entidades principais:  
+
+1. **Usuário** – controla quem realiza ações no sistema.  
+2. **Ala** – organiza motos em setores, facilitando gerenciamento e localização.  
+3. **Moto** – representa o objeto central, com atributos como modelo, status, posição, problema e placa.  
+
+**Justificativa:** essas entidades refletem o domínio de **gerenciamento operacional de motos em alas**, permitindo organização clara, regras de negócio bem definidas e escalabilidade futura (ex.: histórico de manutenção, relatórios, notificações).
 
 ---
 
@@ -16,10 +30,10 @@ API RESTful desenvolvida em **ASP.NET Core (.NET 9)** para gerenciamento de **Mo
 
 A aplicação foi desenvolvida seguindo **arquitetura em camadas**, separando responsabilidades:  
 
-- **Controllers**: recebem as requisições HTTP e retornam respostas.  
-- **Services**: contêm a lógica de negócio, validações e regras do sistema.  
-- **DTOs**: objetos de transferência de dados entre a camada de entrada (Controller) e saída (Service).  
-- **Data (AppDbContext)**: camada de persistência utilizando Entity Framework Core para comunicação com o banco Oracle.  
+- **Controllers**: recebem requisições HTTP e retornam respostas.  
+- **Services**: contêm lógica de negócio e validações.  
+- **DTOs**: transferência de dados entre Controller e Service.  
+- **Data (AppDbContext)**: persistência via Entity Framework Core com Oracle.  
 
 Essa arquitetura facilita **manutenção, testes unitários e escalabilidade**, além de permitir integração fácil com Swagger/OpenAPI para documentação.
 
@@ -81,3 +95,54 @@ POST /api/usuario
   "email": "rafael@example.com",
   "senha": "senha123"
 }
+Criar Moto
+json
+Copiar código
+POST /api/motos
+{
+  "modelo": "Honda CG",
+  "status": "Disponivel",
+  "posicao": "Estacionamento A",
+  "problema": null,
+  "placa": "ABC1234",
+  "alaId": 1
+}
+Criar Ala
+json
+Copiar código
+POST /api/alas
+{
+  "nome": "Ala Norte"
+}
+Para mais exemplos, utilize o Swagger UI disponível em /swagger.
+
+Como rodar a API
+Pré-requisitos
+.NET 9 SDK instalado
+
+Banco de dados Oracle acessível (configurar string de conexão no appsettings.json)
+
+Visual Studio 2022, VS Code ou outro editor de preferência
+
+Passos
+Clone o repositório:
+
+bash
+Copiar código
+git clone https://github.com/RafaMacoto/MottuNET.git
+cd MottuNET
+Atualize o banco de dados via Entity Framework:
+
+bash
+Copiar código
+dotnet ef database update
+Execute a aplicação:
+
+bash
+Copiar código
+dotnet run
+Acesse o Swagger UI:
+
+bash
+Copiar código
+http://localhost:5237/swagger
