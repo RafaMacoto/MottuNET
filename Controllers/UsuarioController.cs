@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
+using MottuNET.DTOs.Commons;
 
 namespace MottuNET.Controllers
 {
@@ -12,6 +13,7 @@ namespace MottuNET.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
+        private const int MaxPageSize = 100;
 
         public UsuarioController(IUsuarioService usuarioService)
         {
@@ -19,12 +21,39 @@ namespace MottuNET.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Lista todos os usuários", Description = "Retorna todos os usuários cadastrados no sistema")]
-        [SwaggerResponse(200, "Lista de usuários retornada com sucesso", typeof(IEnumerable<UsuarioResponseDTO>))]
-        public async Task<ActionResult<IEnumerable<UsuarioResponseDTO>>> GetAll()
+        [SwaggerOperation(Summary = "Lista todos os usuários (paginado)", Description = "Retorna usuários cadastrados - suportando paginação e links HATEOAS")]
+        [SwaggerResponse(200, "Lista de usuários retornada com sucesso", typeof(PagedResponse<UsuarioResponseDTO>))]
+        public async Task<ActionResult<PagedResponse<UsuarioResponseDTO>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var usuarios = await _usuarioService.GetAllAsync();
-            return Ok(usuarios);
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+
+            var all = (await _usuarioService.GetAllAsync()).ToList();
+            var total = all.Count;
+
+            if (total == 0)
+            {
+                var empty = new PagedResponse<UsuarioResponseDTO>(Enumerable.Empty<UsuarioResponseDTO>(), 0, pageNumber, pageSize);
+                empty.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Usuario", new { pageNumber, pageSize }, Request.Scheme)!, "GET"));
+                return Ok(empty);
+            }
+
+            var paged = all.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            
+            var response = new PagedResponse<UsuarioResponseDTO>(paged, total, pageNumber, pageSize);
+
+            
+            response.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Usuario", new { pageNumber, pageSize }, Request.Scheme)!, "GET"));
+            if (pageNumber > 1)
+                response.Links.Add(new LinkDTO("prev", Url.Action(nameof(GetAll), "Usuario", new { pageNumber = pageNumber - 1, pageSize }, Request.Scheme)!, "GET"));
+            if (pageNumber < response.TotalPages)
+                response.Links.Add(new LinkDTO("next", Url.Action(nameof(GetAll), "Usuario", new { pageNumber = pageNumber + 1, pageSize }, Request.Scheme)!, "GET"));
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

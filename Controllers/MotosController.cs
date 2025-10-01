@@ -5,6 +5,7 @@ using MottuNET.Services.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
+using MottuNET.DTOs.Commons;
 
 namespace MottuNET.Controllers
 {
@@ -13,6 +14,7 @@ namespace MottuNET.Controllers
     public class MotosController : ControllerBase
     {
         private readonly IMotoService _motoService;
+        private const int MaxPageSize = 100;
 
         public MotosController(IMotoService motoService)
         {
@@ -20,17 +22,40 @@ namespace MottuNET.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Lista todas as motos", Description = "Retorna todas as motos cadastradas, com filtros opcionais de modelo, status ou ala")]
-        [SwaggerResponse(200, "Lista de motos retornada com sucesso", typeof(IEnumerable<MotoResponseDTO>))]
+        [SwaggerOperation(Summary = "Lista todas as motos (paginado)", Description = "Retorna motos com filtros opcionais e paginação + HATEOAS")]
+        [SwaggerResponse(200, "Lista de motos retornada com sucesso", typeof(PagedResponse<MotoResponseDTO>))]
         [SwaggerResponse(204, "Nenhuma moto encontrada")]
-        public async Task<ActionResult<IEnumerable<MotoResponseDTO>>> GetAll(
-            [FromQuery] string? modelo,
-            [FromQuery] StatusMoto? status,
-            [FromQuery] int? alaId)
+        public async Task<ActionResult<PagedResponse<MotoResponseDTO>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? modelo = null,
+            [FromQuery] StatusMoto? status = null,
+            [FromQuery] int? alaId = null)
         {
-            var motos = await _motoService.GetAllAsync(modelo, status, alaId);
-            if (!motos.Any()) return NoContent();
-            return Ok(motos);
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+
+            var all = (await _motoService.GetAllAsync(modelo, status, alaId)).ToList();
+            var total = all.Count;
+
+            if (total == 0)
+            {
+                var empty = new PagedResponse<MotoResponseDTO>(Enumerable.Empty<MotoResponseDTO>(), 0, pageNumber, pageSize);
+                empty.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Motos", new { pageNumber, pageSize, modelo, status, alaId }, Request.Scheme)!, "GET"));
+                return Ok(empty);
+            }
+
+            var paged = all.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            var response = new PagedResponse<MotoResponseDTO>(paged, total, pageNumber, pageSize);
+
+            response.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Motos", new { pageNumber, pageSize, modelo, status, alaId }, Request.Scheme)!, "GET"));
+            if (pageNumber > 1)
+                response.Links.Add(new LinkDTO("prev", Url.Action(nameof(GetAll), "Motos", new { pageNumber = pageNumber - 1, pageSize, modelo, status, alaId }, Request.Scheme)!, "GET"));
+            if (pageNumber < response.TotalPages)
+                response.Links.Add(new LinkDTO("next", Url.Action(nameof(GetAll), "Motos", new { pageNumber = pageNumber + 1, pageSize, modelo, status, alaId }, Request.Scheme)!, "GET"));
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

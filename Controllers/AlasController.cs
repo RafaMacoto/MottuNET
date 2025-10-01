@@ -4,6 +4,7 @@ using MottuNET.Services.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
+using MottuNET.DTOs.Commons;
 
 namespace MottuNET.Controllers
 {
@@ -12,6 +13,7 @@ namespace MottuNET.Controllers
     public class AlasController : ControllerBase
     {
         private readonly IAlaService _alaService;
+        private const int MaxPageSize = 100;
 
         public AlasController(IAlaService alaService)
         {
@@ -19,14 +21,37 @@ namespace MottuNET.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Lista todas as alas", Description = "Retorna todas as alas cadastradas no sistema")]
-        [SwaggerResponse(200, "Lista de alas retornada com sucesso", typeof(IEnumerable<AlaResponseDTO>))]
+        [SwaggerOperation(Summary = "Lista todas as alas (paginado)", Description = "Retorna alas com paginação e HATEOAS")]
+        [SwaggerResponse(200, "Lista de alas retornada com sucesso", typeof(PagedResponse<AlaResponseDTO>))]
         [SwaggerResponse(204, "Nenhuma ala encontrada")]
-        public async Task<ActionResult<IEnumerable<AlaResponseDTO>>> GetAll()
+        public async Task<ActionResult<PagedResponse<AlaResponseDTO>>> GetAll(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var alas = await _alaService.GetAllAsync();
-            if (!alas.Any()) return NoContent();
-            return Ok(alas);
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+            pageSize = Math.Min(pageSize, MaxPageSize);
+
+            var all = (await _alaService.GetAllAsync()).ToList();
+            var total = all.Count;
+
+            if (total == 0)
+            {
+                var empty = new PagedResponse<AlaResponseDTO>(Enumerable.Empty<AlaResponseDTO>(), 0, pageNumber, pageSize);
+                empty.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Alas", new { pageNumber, pageSize }, Request.Scheme)!, "GET"));
+                return Ok(empty);
+            }
+
+            var paged = all.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            var response = new PagedResponse<AlaResponseDTO>(paged, total, pageNumber, pageSize);
+
+            response.Links.Add(new LinkDTO("self", Url.Action(nameof(GetAll), "Alas", new { pageNumber, pageSize }, Request.Scheme)!, "GET"));
+            if (pageNumber > 1)
+                response.Links.Add(new LinkDTO("prev", Url.Action(nameof(GetAll), "Alas", new { pageNumber = pageNumber - 1, pageSize }, Request.Scheme)!, "GET"));
+            if (pageNumber < response.TotalPages)
+                response.Links.Add(new LinkDTO("next", Url.Action(nameof(GetAll), "Alas", new { pageNumber = pageNumber + 1, pageSize }, Request.Scheme)!, "GET"));
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
