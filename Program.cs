@@ -45,7 +45,7 @@ namespace MottuNET
                 {
                     Title = "Mottu API",
                     Version = "v1",
-                    Description = "API para gerenciamento de Motos, Alas e Usuários"
+                    Description = "API para gerenciamento de Motos, Alas e Usuï¿½rios"
                 });
 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

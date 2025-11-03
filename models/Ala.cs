@@ -11,6 +11,6 @@ namespace MottuNET.Models
         public string Nome { get; set; }
 
         
-        public List<Moto> Motos { get; set; }
+        public List<Moto> Motos { get; set; } = new List<Moto>();
     }
 }
