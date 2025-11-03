@@ -41,6 +41,10 @@ namespace MottuNET.Services
 
         public async Task<MotoResponseDTO> CreateAsync(MotoRequestDTO dto)
         {
+            var ala = await _context.Alas.FindAsync(dto.AlaId);
+            if (ala == null)
+                throw new Exception($"Ala com Id {dto.AlaId} não encontrada.");
+
             var moto = new Moto
             {
                 Modelo = dto.Modelo,

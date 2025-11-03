@@ -52,6 +52,7 @@ namespace MottuNET.Controllers
                 response.Links.Add(new LinkDTO("next", Url.Action(nameof(GetAll), "Alas", new { pageNumber = pageNumber + 1, pageSize }, Request.Scheme)!, "GET"));
 
             return Ok(response);
+
         }
 
         [HttpGet("{id}")]
