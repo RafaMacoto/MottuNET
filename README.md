@@ -140,6 +140,6 @@ dotnet run
 http://localhost:5237/swagger
 
 # Executar testes de um projeto específico
-bash# Navegue até o diretório do projeto de testes
+ Navegue até o diretório do projeto de testes
 cd Tests
 dotnet test
