@@ -5,11 +5,13 @@ using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
 using MottuNET.DTOs.Commons;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MottuNET.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "ApiKey")]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;

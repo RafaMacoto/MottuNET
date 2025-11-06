@@ -5,11 +5,13 @@ using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
 using MottuNET.DTOs.Commons;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MottuNET.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = "ApiKey")]
     public class AlasController : ControllerBase
     {
         private readonly IAlaService _alaService;

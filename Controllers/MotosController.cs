@@ -6,11 +6,14 @@ using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using MottuNET.SwaggerExamples;
 using MottuNET.DTOs.Commons;
+using Microsoft.AspNetCore.Authorization;
+using MottuNET.ML;
 
 namespace MottuNET.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = "ApiKey")]
     public class MotosController : ControllerBase
     {
         private readonly IMotoService _motoService;
@@ -101,6 +104,21 @@ namespace MottuNET.Controllers
             var deleted = await _motoService.DeleteAsync(id);
             if (!deleted) return NotFound();
             return NoContent();
+        }
+
+
+        [HttpPost("prever-ala")]
+        public ActionResult<object> PreverAla([FromBody] MotoAlaData input)
+        {
+            var ml = new MotoAlaModel();
+            var alaPrevista = ml.PreverAla(input.Problema, input.Status);
+
+            return Ok(new
+            {
+                Problema = input.Problema,
+                Status = input.Status,
+                AlaPrevista = alaPrevista
+            });
         }
     }
 }
